@@ -14,18 +14,23 @@ const formPostion = (positionStr) => {
         y
     }
 }
-class MainTaskInstance {
+class ParentInstance {
     constructor(task) {
-        this.shape = 'mainTask'
+        this.shape = 'parentTask'
         this.id = task['-id']
         let positionObj = formPostion(task['-position'])
         this.width = positionObj.width
         this.height = positionObj.height
         this.x = positionObj.x
         this.y = positionObj.y
-        this.label = task['-name']
+        this.leftLabel = task['-name']
+        this.progessLabel = '100%'
+        console.log('task',task)
+        if(task.Status == 'red') {
+            this.progessVisible = false
+        }
     }
 }
 
 
-export default MainTaskInstance
+export default ParentInstance

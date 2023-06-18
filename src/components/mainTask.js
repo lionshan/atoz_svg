@@ -1,4 +1,4 @@
-import ObjectExt from 'objext'
+import {ObjectExt} from '@antv/x6'
 export default {
     inherit: 'rect', // 继承自 Shape.Rect
     width: 120, // 默认宽度
@@ -12,10 +12,10 @@ export default {
             tagName: 'text',
             selector: 'label',
         },
-        {
-            tagName: 'text',
-            selector: 'label2',
-        },
+        // {
+        //     tagName: 'text',
+        //     selector: 'label2',
+        // },
         {
             tagName: 'rect',
             selector: 'progessBg',
@@ -26,10 +26,10 @@ export default {
             selector: 'progess',
         },
 
-        {
-            tagName: 'text',
-            selector: 'progessLabel',
-        },
+        // {
+        //     tagName: 'text',
+        //     selector: 'progessLabel',
+        // },
         {
             tagName: 'image',
             selector: 'img',
@@ -104,7 +104,7 @@ export default {
 
     },
     propHooks(metadata) {
-        console.log('propHookspropHookspropHooks', metadata)
+
         const { progessLabel, ...others } = metadata
         if (progessLabel) {
             ObjectExt.setByPath(others, 'attrs/text/text', progessLabel)

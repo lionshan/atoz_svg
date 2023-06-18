@@ -1,16 +1,24 @@
 <template>
-  <div id="container"></div>
+  <div class="">
+    <div class="loading" v-show="loading">正在加载中</div>
+    <div id="container" v-show="!loading"></div>
+  </div>
 </template>
 
 <script>
-import { getXMLData } from "../request";
+import { getXMLData, getProjectTask } from "../request";
 import Graph from './antv.js';
+import { Shape } from '@antv/x6';
+
 import MainTaskInstance from './mainTaskInstance'
+import ParentTaskInstance from './parentTaskInstance'
+
 export default {
   name: "Atoz_app",
   props: {},
   data() {
     return {
+      projectTaskData: {},
       needMianTask: [],
       quoteTask: [],
       eventNode: [],
@@ -18,37 +26,232 @@ export default {
       inclusiveNode: [],
       exclusiveNode: [],
       graph: null,
-      scale: 2,
-      maxX:0,
-      maxY:0
+      maxX: 0,
+      maxY: 0,
+      loading: true,
+      wrapRect: null
     }
   },
   mounted() {
 
 
-    //1 加载xml数据 （通过接口请求文件地址，然后根据地址请求数据）
-    getXMLData("./test.xml").then((res) => {
-      const xotree = new window.XML.ObjTree();
-      const json = xotree.parseXML(res.data);
-      console.log(res);
-      console.log(json);
-      this.handleXML(json)
-      //初始画布
-      this.graph = new Graph({
-        container: document.getElementById('container'),
-        width: (this.maxX + 100) / this.scale,
-        height: (this.maxY + 100) / this.scale,
+    getProjectTask('23603.47162.44135.3025').then(res => {
+      for (let index = 0; index < res.msg.length; index++) {
+        const task = res.msg[index];
+        this.projectTaskData[task.id] = task
+      }
+      console.log('projectTaskData', this.projectTaskData)
+      //1 加载xml数据 （通过接口请求文件地址，然后根据地址请求数据）
+      getXMLData("./test.xml").then((res) => {
+        const xotree = new window.XML.ObjTree();
+        const json = xotree.parseXML(res.data);
+        console.log(res);
+        console.log(json);
+        this.handleXML(json)
+        //初始画布
+        this.graph = new Graph({
+          container: document.getElementById('container'),
+          width: (this.maxX + 100),
+          height: (this.maxY + 100),
+          interacting: false,
+          grid: {
+            size: 10,      // 网格大小 10px
+            visible: true, // 渲染网格背景
+          },
+          panning: true,
+          // autoResize: true,
+          background: {
+            color: '#fffbe6', // 设置画布背景颜色
+          },
+          scroller: {
+            enabled: true,
+            pannable: true,
+            pageVisible: true,
+            pageBreak: false,
+          },
+          mousewheel: {
+            enabled: true,
+            modifiers: ['ctrl', 'meta'],
+          }
+        });
+
+
+        this.graph.on('click:task', ({ node }) => {
+          console.log('nodenodenodenodenodenode', node)
+        })
+        this.wrapRect = new Shape.Rect({
+          width: this.maxX,
+          height: this.maxY,
+          x: 0,
+          y: 0
+        })
+        this.graph.addNode(this.wrapRect)
+        let scale = (document.documentElement.clientHeight / (this.maxY + 100))
+        console.log('document.body.offsetHeight', document.documentElement.clientHeight)
+        console.log('document.body.offsetHeight', (this.maxY + 100))
+        window.wrapRect = this.wrapRect
+        console.log('scale', scale, this.graph)
+        this.graph.zoomTo(scale)
+        this.graph.translate(0, 0)
+        // this.graph.zoomToRect(this.wrapRect,{
+        //   padding: 0
+        // })
+        this.drawMainTask(this.needMianTask)
+        this.drawOtherTask(this.quoteTask)
+        this.drawEvent(this.eventNode)
+        this.drawExclusiveNode(this.exclusiveNode)
+        this.drawInclusiveNode(this.inclusiveNode)
+        this.drawEdge(this.flowEdge)
+        this.loading = false
       });
-      this.drawMainTask(this.needMianTask)
-    });
+    })
+
   },
   methods: {
+    handleState(arr) {
+      return arr.map(item => {
+        let data = this.projectTaskData[item['-id2']]
+        console.log('datadatadata', data)
+        return {
+          ...data,
+          ...item
+        }
+      })
+    },
+    formEventPostion(positionStr) {
+      let positionArr = positionStr.replaceAll('[', '').replaceAll(']', '').split(',')
+      let x = positionArr[0]
+      let y = positionArr[1]
+      let width = (positionArr[2] - positionArr[0])
+      let height = (positionArr[3] - positionArr[1])
+      return {
+        width,
+        height,
+        x,
+        y
+      }
+    },
+    formNodePostion(positionStr) {
+      let positionArr = positionStr.replaceAll('[', '').replaceAll(']', '').split(',')
+
+      let x = positionArr[0]
+      let y = positionArr[1]
+
+      return {
+        x,
+        y
+      }
+    },
+    formFlowPostion(positionStr) {
+      let positionArr = positionStr.replaceAll('[', '').replaceAll(']', '').split(',')
+      return {
+        x1: positionArr[0],
+        y1: positionArr[1],
+        x2: positionArr[2],
+        y2: positionArr[3],
+      }
+    },
+    drawInclusiveNode(nodes) {
+      for (let index = 0; index < nodes.length; index++) {
+        const node = nodes[index];
+        let pos = this.formEventPostion(node['-position'])
+        this.graph.addNode({
+          id: node['-id'],
+          shape: 'circle',
+          width: pos.width,
+          height: pos.height,
+          x: pos.x,
+          y: pos.y,
+          attrs: {
+            body: {
+              strokeWidth: 1,
+              stroke: '#000', // 边框颜色
+              fill: '#fff',   // 填充颜色
+            }
+          }
+        })
+      }
+    },
+    drawExclusiveNode(nodes) {
+      this.drawInclusiveNode(nodes)
+    },
+    drawEvent(events) {
+      for (let index = 0; index < events.length; index++) {
+        const event = events[index];
+        const pos = this.formEventPostion(event['-position'])
+        if (event['-type'] == 'Start Event') {
+          this.graph.addNode({
+            id: event['-id'],
+            shape: 'circle',
+            width: event['-r'] * 2,
+            height: event['-r'] * 2,
+            x: pos.x - (event['-r']),
+            y: pos.y - (event['-r']),
+            attrs: {
+              body: {
+                strokeWidth: 1,
+                stroke: '#000', // 边框颜色
+                fill: '#73e320',   // 填充颜色
+              }
+            }
+          })
+        }
+        else {
+          this.graph.addNode({
+            id: event['-id'],
+            shape: 'circle',
+            width: event['-r'] * 2,
+            height: event['-r'] * 2,
+            x: pos.x - (event['-r']),
+            y: pos.y - (event['-r']),
+            attrs: {
+              body: {
+                strokeWidth: 1,
+                stroke: '#000', // 边框颜色
+                fill: '#c5cfd2',   // 填充颜色
+              }
+            }
+          })
+        }
+      }
+    },
+    drawOtherTask(tasks) {
+      this.drawMainTask(tasks)
+    },
     drawMainTask(tasks) {
       for (let index = 0; index < tasks.length; index++) {
         const task = tasks[index];
-        let taskInstance = new MainTaskInstance(task,index)
+        if (task.lastChild) {
+          let taskInstance = new MainTaskInstance(task)
+          this.graph.addNode(taskInstance)
+        }
+        else {
+          let instance = new ParentTaskInstance(task)
+          this.graph.addNode(instance)
+        }
+
         // console.log('taskInstancetaskInstancetaskInstance', taskInstance)
-        this.graph.addNode(taskInstance)
+
+      }
+    },
+    drawEdge(edges) {
+
+      for (let index = 0; index < edges.length; index++) {
+        const edge = edges[index];
+        // let pos = this.formFlowPostion(edge['-position'])
+        this.graph.addEdge({
+          router: {
+            name: 'manhattan',
+            args: {
+              padding: 1,
+              startDirections: ['right', 'top', 'bottom'],
+              endDirections: ['left', 'top', 'bottom'],
+            },
+          },
+          shape: 'edge',
+          source: edge['-from'],
+          target: edge['-to'],
+        })
       }
     },
     //处理xml数据返回不同类型的task  
@@ -86,54 +289,33 @@ export default {
 
       needMianTask = this.handleParent(mainTask)
 
-      this.needMianTask = needMianTask;
-      this.quoteTask = quoteTask;
+      this.needMianTask = this.handleState(needMianTask);
+      console.log('this.needMianTask', this.needMianTask)
+      this.quoteTask = this.handleState(quoteTask);
       this.eventNode = eventNode;
       this.flowEdge = flowEdge;
       this.inclusiveNode = inclusiveNode;
       this.exclusiveNode = exclusiveNode;
-      console.log('this.maxX = maxX;',this.maxX)
-      console.log('this.maxY = maxY;',this.maxY)
+      console.log('this.maxX = maxX;', this.maxX)
+      console.log('this.maxY = maxY;', this.maxY)
 
     },
 
-    handleParent(tempTasks) {
-      let tasksArr = tempTasks
-      let taskRootObj = {}// filed: 最大的父节点 value: 子节点
-      let taskParentNameObj = {}// filed: 父节点 value: 子节点
-      let taskNameObj = {} // filed: 任务名称 value: 任务对象
-      tasksArr.forEach((item) => {
-        const { '-name': taskName, '-parentname': parentname } = item
-        taskNameObj[taskName] = item
-        if (!parentname) {
-          taskRootObj[taskName] = item
-          return
-        }
-        if (!taskParentNameObj[parentname]) {
-          taskParentNameObj[parentname] = []
-        }
-        taskParentNameObj[parentname].push(item)
-      });
-      const testData = []
-      const getChildrenData = (taskName, element) => {
-        let children = taskParentNameObj[taskName] || []
-        if (children.length) {
-          element['children'] = taskParentNameObj[taskName]
-          element['children'].forEach((item, index) => {
-            getChildrenData(item.name, element['children'][index])
-          })
-        } else {
-          element['lastchild'] = true
-        }
-        testData.push(element)
+    handleParent(allTasks) {
+      let resArr = []
+      let tempTasks = allTasks.filter(item => { return item['-parentname'] != undefined })
+      let parentArr = allTasks.filter(item => { return item['-parentname'] == undefined })
+
+      while (parentArr.length != 0) {
+        let task = parentArr.shift()
+        let children = tempTasks.filter(item => { return item['-parentname'] == task['-name'] })
+        tempTasks = tempTasks.filter(item => { return item['-parentname'] != task['-name'] })
+        task.lastChild = (children.length == 0)
+        parentArr.push(...children)
+        resArr.push(task)
       }
-      for (const key in taskRootObj) {
-        if (Object.prototype.hasOwnProperty.call(taskRootObj, key)) {
-          getChildrenData(key, taskNameObj[key])
-        }
-      }
-      console.log(testData, 'testData')
-      return testData
+      console.log('handleParenthandleParent', resArr)
+      return resArr
     }
 
   }
