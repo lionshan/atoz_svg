@@ -24,11 +24,18 @@ class ParentInstance {
         this.x = positionObj.x
         this.y = positionObj.y
         this.leftLabel = task['-name']
-        this.progessLabel = '100%'
-        console.log('task',task)
-        if(task.Status == 'red') {
+        if(task.current != '工作中' && task.current != '审批中') {
             this.progessVisible = false
         }
+        this.status = task.Status
+        this.progessLabel = (Number(task.percentComplete) + Math.random() * 100).toFixed(2) + '%'
+        this.hasQuestion = task.hasQuestion == 'Y'
+        this.hasRisk = task.hasRisk == 'Y'
+        if(Math.random() > 0.5) {
+            this.progessVisible = true
+            this.hasQuestion = true
+        }
+
     }
 }
 

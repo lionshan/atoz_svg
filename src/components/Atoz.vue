@@ -8,10 +8,11 @@
 <script>
 import { getXMLData, getProjectTask } from "../request";
 import Graph from './antv.js';
-import { Shape } from '@antv/x6';
 
 import MainTaskInstance from './mainTaskInstance'
 import ParentTaskInstance from './parentTaskInstance'
+import QuoteTaskInstance from './quoteTaskInstance'
+
 
 export default {
   name: "Atoz_app",
@@ -20,6 +21,7 @@ export default {
     return {
       projectTaskData: {},
       needMianTask: [],
+      allTask:[],
       quoteTask: [],
       eventNode: [],
       flowEdge: [],
@@ -36,17 +38,15 @@ export default {
 
 
     getProjectTask('23603.47162.44135.3025').then(res => {
+
       for (let index = 0; index < res.msg.length; index++) {
         const task = res.msg[index];
         this.projectTaskData[task.id] = task
       }
-      console.log('projectTaskData', this.projectTaskData)
       //1 加载xml数据 （通过接口请求文件地址，然后根据地址请求数据）
       getXMLData("./test.xml").then((res) => {
         const xotree = new window.XML.ObjTree();
         const json = xotree.parseXML(res.data);
-        console.log(res);
-        console.log(json);
         this.handleXML(json)
         //初始画布
         this.graph = new Graph({
@@ -54,15 +54,10 @@ export default {
           width: (this.maxX + 100),
           height: (this.maxY + 100),
           interacting: false,
-          grid: {
-            size: 10,      // 网格大小 10px
-            visible: true, // 渲染网格背景
-          },
           panning: true,
-          // autoResize: true,
-          background: {
-            color: '#fffbe6', // 设置画布背景颜色
-          },
+          // background: {
+          //   color: '#fffbe6', // 设置画布背景颜色
+          // },
           scroller: {
             enabled: true,
             pannable: true,
@@ -76,26 +71,23 @@ export default {
         });
 
 
-        this.graph.on('click:task', ({ node }) => {
-          console.log('nodenodenodenodenodenode', node)
+        this.graph.on('click:task', ({node}) => {
+          let id = node.id;
+          let task = this.allTask.find(item => {
+            return id == item['-id']
+          })
+          if(task) {
+            let dataTask = this.projectTaskData[task['-id2']]
+            console.log('点击',dataTask)
+            //展示弹窗数据
+          }
         })
-        this.wrapRect = new Shape.Rect({
-          width: this.maxX,
-          height: this.maxY,
-          x: 0,
-          y: 0
-        })
-        this.graph.addNode(this.wrapRect)
+       
         let scale = (document.documentElement.clientHeight / (this.maxY + 100))
-        console.log('document.body.offsetHeight', document.documentElement.clientHeight)
-        console.log('document.body.offsetHeight', (this.maxY + 100))
-        window.wrapRect = this.wrapRect
         console.log('scale', scale, this.graph)
         this.graph.zoomTo(scale)
         this.graph.translate(0, 0)
-        // this.graph.zoomToRect(this.wrapRect,{
-        //   padding: 0
-        // })
+
         this.drawMainTask(this.needMianTask)
         this.drawOtherTask(this.quoteTask)
         this.drawEvent(this.eventNode)
@@ -111,7 +103,6 @@ export default {
     handleState(arr) {
       return arr.map(item => {
         let data = this.projectTaskData[item['-id2']]
-        console.log('datadatadata', data)
         return {
           ...data,
           ...item
@@ -216,7 +207,11 @@ export default {
       }
     },
     drawOtherTask(tasks) {
-      this.drawMainTask(tasks)
+      for (let index = 0; index < tasks.length; index++) {
+        const task = tasks[index];
+        let taskInstance = new QuoteTaskInstance(task)
+        this.graph.addNode(taskInstance)
+      }
     },
     drawMainTask(tasks) {
       for (let index = 0; index < tasks.length; index++) {
@@ -229,9 +224,6 @@ export default {
           let instance = new ParentTaskInstance(task)
           this.graph.addNode(instance)
         }
-
-        // console.log('taskInstancetaskInstancetaskInstance', taskInstance)
-
       }
     },
     drawEdge(edges) {
@@ -243,9 +235,9 @@ export default {
           router: {
             name: 'manhattan',
             args: {
-              padding: 1,
-              startDirections: ['right', 'top', 'bottom'],
-              endDirections: ['left', 'top', 'bottom'],
+              padding: 10,
+              // startDirections: ['right', 'top', 'bottom'],
+              // endDirections: ['left', 'top', 'bottom'],
             },
           },
           shape: 'edge',
@@ -265,7 +257,7 @@ export default {
       let exclusiveNode = xmlJson.processes.Process.ExclusiveGateway;
       let allTask = xmlJson.processes.Process.task;
       let anchorFlag = xmlJson.processes.Process.anchor;
-
+      this.allTask = allTask;
       //区分主副任务
       for (let index = 0; index < allTask.length; index++) {
 
@@ -314,7 +306,6 @@ export default {
         parentArr.push(...children)
         resArr.push(task)
       }
-      console.log('handleParenthandleParent', resArr)
       return resArr
     }
 

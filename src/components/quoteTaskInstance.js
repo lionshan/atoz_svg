@@ -3,7 +3,7 @@ const formPostion = (positionStr) => {
 
     let positionArr = positionStr.replaceAll('[', '').replaceAll(']', '').split(',')
     let width = (positionArr[2] - positionArr[0]) 
-    let height = (positionArr[3] - positionArr[1]) 
+    let height = (positionArr[3] - positionArr[1]) + 10
     let x = positionArr[0] 
     let y = positionArr[1] 
 
@@ -14,9 +14,9 @@ const formPostion = (positionStr) => {
         y
     }
 }
-class MainTaskInstance {
+class QuoteTaskInstance {
     constructor(task) {
-        this.shape = 'mainTask'
+        this.shape = 'quoteTask'
         this.id = task['-id']
         let positionObj = formPostion(task['-position'])
         this.width = positionObj.width
@@ -41,4 +41,4 @@ class MainTaskInstance {
 }
 
 
-export default MainTaskInstance
+export default QuoteTaskInstance

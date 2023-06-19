@@ -1,5 +1,4 @@
 import { ObjectExt } from '@antv/x6'
-
 export default {
     inherit: 'rect', // 继承自 Shape.Rect
     width: 120, // 默认宽度
@@ -7,21 +6,25 @@ export default {
     markup: [
         {
             tagName: 'g',
-            selector: 'taskWrap',
-            children: [
+            selector: 'quoteWrap',
+            children:[
                 {
                     tagName: 'rect',
                     selector: 'body',
                 },
                 {
                     tagName: 'text',
-                    selector: 'leftLabel',
+                    selector: 'mainLabel',
+                },
+                {
+                    tagName: 'text',
+                    selector: 'topLabel',
                 },
                 {
                     tagName: 'rect',
                     selector: 'progessBg',
                 },
-
+        
                 {
                     tagName: 'rect',
                     selector: 'progess',
@@ -32,24 +35,26 @@ export default {
                 },
                 {
                     tagName: 'image',
-                    selector: 'imgRisk',
+                    selector: 'imgQus',
                 },
                 {
                     tagName: 'image',
-                    selector: 'imgQus',
+                    selector: 'imgRisk',
                 },
             ]
         }
+        
+
     ],
     attrs: {
-        taskWrap: {
+        quoteWrap: {
             cursor: 'pointer',
             event: 'click:task',
         },
         body: {
             rx: 10, // 圆角矩形
             strokeWidth: 1,
-            fill: '#f2f2f2',
+            fill: '#d7d7d7',
             stroke: '#c3c6c7',
         },
         progess: {
@@ -72,16 +77,25 @@ export default {
             refY: '100%',     // 矩形 y 轴坐标位于节点右下角
             y: -10,
             fill: "#fff",
-            strokeWidth: 1,
-            stroke: "#c3c6c7"
+            strokeWidth: 1
         },
-        leftLabel: {
+        topLabel: {
             ref: 'body',
             fill: '#000',
             fontSize: 12,
-            refX: 5,
-            refY: 10,
-            textAnchor: 'left',
+            refX: '50%',
+            refY: '30%',
+            textAnchor: 'middle',
+            textVerticalAnchor: 'middle',
+            text:'A'
+        },
+        mainLabel: {
+            ref: 'body',
+            fill: '#000',
+            fontSize: 12,
+            refX: '50%',
+            refY: '70%',
+            textAnchor: 'middle',
             textVerticalAnchor: 'middle',
         },
         progessLabel: {
@@ -102,7 +116,7 @@ export default {
             height: 16,
             'xlink:href':
                 './risk.jpg',
-            display:'none'
+            display: 'none'
         },
         imgQus: {
             ref: 'body',
@@ -112,13 +126,13 @@ export default {
             height: 16,
             'xlink:href':
                 './question.jpg',
-            display:'none'
+            display: 'none'
         },
     },
     propHooks(metadata) {
-        const { progessLabel, leftLabel, progessVisible,hasQuestion,hasRisk, ...others } = metadata
-        if (leftLabel) {
-            ObjectExt.setByPath(others, 'attrs/leftLabel/text', leftLabel)
+        const { progessLabel, mainLabel, progessVisible,hasQuestion,hasRisk,status, ...others } = metadata
+        if (mainLabel) {
+            ObjectExt.setByPath(others, 'attrs/mainLabel/text', mainLabel)
         }
         if (progessLabel) {
             ObjectExt.setByPath(others, 'attrs/progessLabel/text', progessLabel)
@@ -132,12 +146,14 @@ export default {
 
         if(hasQuestion) {
             ObjectExt.setByPath(others, 'attrs/imgQus/display', 'block')
-            ObjectExt.setByPath(others, 'attrs/leftLabel/refX', 25)
         }
 
         if(hasRisk) {
             ObjectExt.setByPath(others, 'attrs/imgRisk/display', 'block')
-            ObjectExt.setByPath(others, 'attrs/leftLabel/refX', 25)
+        }
+
+        if(status) {
+            ObjectExt.setByPath(others, 'attrs/body/fill', status)
         }
         return others
     },
