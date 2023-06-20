@@ -2,27 +2,34 @@
   <div class="">
     <div class="loading" v-show="loading">正在加载中</div>
     <div id="container" v-show="!loading"></div>
-    <el-dialog title="任务详情" :visible.sync="dialogVisible" width="50%" :show-close="false" @close="closeDialog" >
+    <el-dialog title="任务详情" :visible.sync="dialogVisible" width="50%" :show-close="false" @close="closeDialog">
       <el-descriptions :title="dialogData && dialogData.name" direction="vertical" :column="12" border>
         <el-descriptions-item :span="6" label="创建人">{{ dialogData && dialogData.owner }}</el-descriptions-item>
         <el-descriptions-item :span="6" label="负责人">{{ dialogData && dialogData.Assignee }}</el-descriptions-item>
         <el-descriptions-item :span="4" label="当前阶段">{{ dialogData && dialogData.current }}</el-descriptions-item>
         <el-descriptions-item :span="4" label="完成进度">{{ dialogData && dialogData.percentComplete }}</el-descriptions-item>
-        <el-descriptions-item :span="4" label="创建日期" >{{ dialogData && getDateStr(dialogData.originated) }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="创建日期">{{ dialogData && getDateStr(dialogData.originated)
+        }}</el-descriptions-item>
         <el-descriptions-item :span="12" label="描述信息">{{ dialogData && dialogData.description }}</el-descriptions-item>
-        <el-descriptions-item :span="4" label="估计开始时间">{{ dialogData && getDateStr(dialogData.estimatedStartDate) }}</el-descriptions-item>
-        <el-descriptions-item :span="4" label="估计截止时间">{{ dialogData && getDateStr(dialogData.estimatedEndDate) }}</el-descriptions-item>
-        <el-descriptions-item :span="4" label="估计持续时间">{{ dialogData && dialogData.estimatedDuration }}</el-descriptions-item>
-        <el-descriptions-item :span="4" label="实际开始时间">{{ dialogData && getDateStr(dialogData.actualStartDate) }}</el-descriptions-item>
-        <el-descriptions-item :span="4" label="实际截止时间">{{ dialogData && getDateStr(dialogData.actualEndDate) }}</el-descriptions-item>
-        <el-descriptions-item :span="4" label="实际持续时间">{{ dialogData && dialogData.actualDuration }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="估计开始时间">{{ dialogData && getDateStr(dialogData.estimatedStartDate)
+        }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="估计截止时间">{{ dialogData && getDateStr(dialogData.estimatedEndDate)
+        }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="估计持续时间">{{ dialogData && dialogData.estimatedDuration
+        }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="实际开始时间">{{ dialogData && getDateStr(dialogData.actualStartDate)
+        }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="实际截止时间">{{ dialogData && getDateStr(dialogData.actualEndDate)
+        }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="实际持续时间">{{ dialogData && dialogData.actualDuration
+        }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { getXMLData, getProjectTask } from "../request";
+import { getXMLData, getProjectTask,getXMLInfo } from "../request";
 import Graph from './antv.js';
 
 import MainTaskInstance from './mainTaskInstance'
@@ -49,80 +56,82 @@ export default {
       loading: true,
       wrapRect: null,
       dialogVisible: false,
-      dialogData:null
+      dialogData: null
     }
   },
   mounted() {
-
-
-    getProjectTask('23603.47162.44135.3025').then(res => {
-
-      for (let index = 0; index < res.msg.length; index++) {
-        const task = res.msg[index];
+    getProjectTask(window.objectId).then(res => {
+      console.log('getProjectTask',res)
+      for (let index = 0; index < res.data.msg.length; index++) {
+        const task = res.data.msg[index];
         this.projectTaskData[task.id] = task
       }
-      //1 加载xml数据 （通过接口请求文件地址，然后根据地址请求数据）
-      getXMLData("./test.xml").then((res) => {
-        const xotree = new window.XML.ObjTree();
-        const json = xotree.parseXML(res.data);
-        this.handleXML(json)
-        //初始画布
-        this.graph = new Graph({
-          container: document.getElementById('container'),
-          width: (this.maxX + 100),
-          height: (this.maxY + 100),
-          interacting: false,
-          panning: true,
-          // background: {
-          //   color: '#fffbe6', // 设置画布背景颜色
-          // },
-          scroller: {
-            enabled: true,
-            pannable: true,
-            pageVisible: true,
-            pageBreak: false,
-          },
-          mousewheel: {
-            enabled: true,
-            modifiers: ['ctrl', 'meta'],
-          }
-        });
+      getXMLInfo().then(xmlPath => {
+        //1 加载xml数据 （通过接口请求文件地址，然后根据地址请求数据）
+        let xmlURL = '/3dspace/' + xmlPath.data.fileUrl.split('/3dspace/')[1]
+        getXMLData(xmlURL).then((res) => {
+          const xotree = new window.XML.ObjTree();
+          const json = xotree.parseXML(res.data);
+          this.handleXML(json)
+          //初始画布
+          this.graph = new Graph({
+            container: document.getElementById('container'),
+            width: (this.maxX + 100),
+            height: (this.maxY + 100),
+            interacting: false,
+            panning: true,
+            // background: {
+            //   color: '#fffbe6', // 设置画布背景颜色
+            // },
+            scroller: {
+              enabled: true,
+              pannable: true,
+              pageVisible: true,
+              pageBreak: false,
+            },
+            mousewheel: {
+              enabled: true,
+              modifiers: ['ctrl', 'meta'],
+            }
+          });
 
 
-        this.graph.on('click:task', ({ node }) => {
-          let id = node.id;
-          let task = this.allTask.find(item => {
-            return id == item['-id']
+          this.graph.on('click:task', ({ node }) => {
+            let id = node.id;
+            let task = this.allTask.find(item => {
+              return id == item['-id']
+            })
+            if (task) {
+              let dataTask = this.projectTaskData[task['-id2']]
+              // console.log('点击', dataTask)
+              this.dialogData = dataTask
+              this.dialogVisible = true
+              //展示弹窗数据
+            }
           })
-          if (task) {
-            let dataTask = this.projectTaskData[task['-id2']]
-            // console.log('点击', dataTask)
-            this.dialogData = dataTask
-            this.dialogVisible = true
-            //展示弹窗数据
-          }
-        })
 
-        let scale = (document.documentElement.clientHeight / (this.maxY + 100))
-        console.log('scale', scale, this.graph)
-        this.graph.zoomTo(scale)
-        this.graph.translate(0, 0)
+          let scale = (document.documentElement.clientHeight / (this.maxY + 100))
+          console.log('scale', scale, this.graph)
+          this.graph.zoomTo(scale)
+          this.graph.translate(0, 0)
 
-        this.drawMainTask(this.needMianTask)
-        this.drawOtherTask(this.quoteTask)
-        this.drawEvent(this.eventNode)
-        this.drawExclusiveNode(this.exclusiveNode)
-        this.drawInclusiveNode(this.inclusiveNode)
-        this.drawEdge(this.flowEdge)
-        this.loading = false
-      });
+          this.drawMainTask(this.needMianTask)
+          this.drawOtherTask(this.quoteTask)
+          this.drawEvent(this.eventNode)
+          this.drawExclusiveNode(this.exclusiveNode)
+          this.drawInclusiveNode(this.inclusiveNode)
+          this.drawEdge(this.flowEdge)
+          this.loading = false
+        });
+      })
+
     })
 
   },
   computed: {
     getDateStr() {
       return (str) => {
-        if(str == '') {
+        if (str == '') {
           return ''
         }
         let date = new Date(str)

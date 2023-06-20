@@ -101,7 +101,7 @@ export default {
             width: 16,
             height: 16,
             'xlink:href':
-                './risk.jpg',
+                './assets/risk.jpg',
             display:'none'
         },
         imgQus: {
@@ -111,7 +111,7 @@ export default {
             width: 16,
             height: 16,
             'xlink:href':
-                './question.jpg',
+                './assets/question.jpg',
             display:'none'
         },
     },

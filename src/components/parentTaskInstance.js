@@ -28,13 +28,16 @@ class ParentInstance {
             this.progessVisible = false
         }
         this.status = task.Status
-        this.progessLabel = (Number(task.percentComplete) + Math.random() * 100).toFixed(2) + '%'
+        if(task.percentComplete){
+            this.progessLabel = Number(task.percentComplete).toFixed(2) + '%'
+        }
+        // this.progessLabel = (Number(task.percentComplete) + Math.random() * 100).toFixed(2) + '%'
         this.hasQuestion = task.hasQuestion == 'Y'
         this.hasRisk = task.hasRisk == 'Y'
-        if(Math.random() > 0.5) {
-            this.progessVisible = true
-            this.hasQuestion = true
-        }
+        // if(Math.random() > 0.5) {
+        //     this.progessVisible = true
+        //     this.hasQuestion = true
+        // }
 
     }
 }
