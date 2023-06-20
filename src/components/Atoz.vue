@@ -2,6 +2,22 @@
   <div class="">
     <div class="loading" v-show="loading">正在加载中</div>
     <div id="container" v-show="!loading"></div>
+    <el-dialog title="任务详情" :visible.sync="dialogVisible" width="50%" :show-close="false" @close="closeDialog" >
+      <el-descriptions :title="dialogData && dialogData.name" direction="vertical" :column="12" border>
+        <el-descriptions-item :span="6" label="创建人">{{ dialogData && dialogData.owner }}</el-descriptions-item>
+        <el-descriptions-item :span="6" label="负责人">{{ dialogData && dialogData.Assignee }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="当前阶段">{{ dialogData && dialogData.current }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="完成进度">{{ dialogData && dialogData.percentComplete }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="创建日期" >{{ dialogData && getDateStr(dialogData.originated) }}</el-descriptions-item>
+        <el-descriptions-item :span="12" label="描述信息">{{ dialogData && dialogData.description }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="估计开始时间">{{ dialogData && getDateStr(dialogData.estimatedStartDate) }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="估计截止时间">{{ dialogData && getDateStr(dialogData.estimatedEndDate) }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="估计持续时间">{{ dialogData && dialogData.estimatedDuration }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="实际开始时间">{{ dialogData && getDateStr(dialogData.actualStartDate) }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="实际截止时间">{{ dialogData && getDateStr(dialogData.actualEndDate) }}</el-descriptions-item>
+        <el-descriptions-item :span="4" label="实际持续时间">{{ dialogData && dialogData.actualDuration }}</el-descriptions-item>
+      </el-descriptions>
+    </el-dialog>
   </div>
 </template>
 
@@ -21,7 +37,7 @@ export default {
     return {
       projectTaskData: {},
       needMianTask: [],
-      allTask:[],
+      allTask: [],
       quoteTask: [],
       eventNode: [],
       flowEdge: [],
@@ -31,7 +47,9 @@ export default {
       maxX: 0,
       maxY: 0,
       loading: true,
-      wrapRect: null
+      wrapRect: null,
+      dialogVisible: false,
+      dialogData:null
     }
   },
   mounted() {
@@ -71,18 +89,20 @@ export default {
         });
 
 
-        this.graph.on('click:task', ({node}) => {
+        this.graph.on('click:task', ({ node }) => {
           let id = node.id;
           let task = this.allTask.find(item => {
             return id == item['-id']
           })
-          if(task) {
+          if (task) {
             let dataTask = this.projectTaskData[task['-id2']]
-            console.log('点击',dataTask)
+            // console.log('点击', dataTask)
+            this.dialogData = dataTask
+            this.dialogVisible = true
             //展示弹窗数据
           }
         })
-       
+
         let scale = (document.documentElement.clientHeight / (this.maxY + 100))
         console.log('scale', scale, this.graph)
         this.graph.zoomTo(scale)
@@ -99,7 +119,21 @@ export default {
     })
 
   },
+  computed: {
+    getDateStr() {
+      return (str) => {
+        if(str == '') {
+          return ''
+        }
+        let date = new Date(str)
+        return `${date.toLocaleDateString()}  ${date.toLocaleTimeString()}`
+      }
+    }
+  },
   methods: {
+    closeDialog() {
+      this.dialogData = null
+    },
     handleState(arr) {
       return arr.map(item => {
         let data = this.projectTaskData[item['-id2']]
