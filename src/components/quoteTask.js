@@ -112,7 +112,7 @@ export default {
             xAlign: 'right',
             ref: 'body',
             fill: '#000',
-            fontSize: 16,
+            fontSize: 12,
             refX: '100%',
             refX2: -5,
             refY: 10,

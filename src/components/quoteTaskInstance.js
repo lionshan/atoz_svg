@@ -36,7 +36,7 @@ class QuoteTaskInstance {
         }
         this.status = colorMap[task.Status]
         if(task.percentComplete) {
-            this.progessLabel = Number(task.percentComplete).toFixed(2) + '%'
+            this.progessLabel = Number(task.percentComplete).toFixed(0) + '%'
             // this.progessLabel = (Number(task.percentComplete) + Math.random() * 100).toFixed(2) + '%'
         }
         this.hasQuestion = task.hasQuestion == 'Y'

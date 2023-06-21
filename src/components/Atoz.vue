@@ -62,8 +62,8 @@ export default {
     }
   },
   mounted() {
-    this.testInit()
-    // this.proInit()
+    // this.testInit()
+    this.proInit()
   },
   computed: {
     getDateStr() {

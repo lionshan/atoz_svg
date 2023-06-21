@@ -128,7 +128,6 @@ export default {
     propHooks(metadata) {
         const { progessLabel, mainLabel, progessVisible, hasQuestion, hasRisk, status, ...others } = metadata
         if (mainLabel) {
-            console.log('othersothersothersothersothers', others)
             ObjectExt.setByPath(others, 'attrs/mainLabel/text', mainLabel)
         }
         if (progessLabel) {
