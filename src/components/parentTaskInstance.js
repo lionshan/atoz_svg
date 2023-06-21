@@ -27,7 +27,14 @@ class ParentInstance {
         if(task.current != '工作中' && task.current != '审批中') {
             this.progessVisible = false
         }
-        this.status = task.Status
+        const colorMap = {
+            gray :'gray',
+            yellow: 'yellow',
+            Lightred: '#f99bae',
+            green: 'green',
+            red: 'red'
+        }
+        this.status = colorMap[task.Status]
         if(task.percentComplete){
             this.progessLabel = Number(task.percentComplete).toFixed(2) + '%'
         }

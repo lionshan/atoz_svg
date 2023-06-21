@@ -23,11 +23,18 @@ class QuoteTaskInstance {
         this.height = positionObj.height
         this.x = positionObj.x
         this.y = positionObj.y
-        this.mainLabel = task['-name']
+        this.mainLabel = 'A ' + task['-name']
         if(task.current != '工作中' && task.current != '审批中') {
             this.progessVisible = false
         }
-        this.status = task.Status
+        const colorMap = {
+            gray :'gray',
+            yellow: 'yellow',
+            Lightred: '#f99bae',
+            green: 'green',
+            red: 'red'
+        }
+        this.status = colorMap[task.Status]
         if(task.percentComplete) {
             this.progessLabel = Number(task.percentComplete).toFixed(2) + '%'
             // this.progessLabel = (Number(task.percentComplete) + Math.random() * 100).toFixed(2) + '%'

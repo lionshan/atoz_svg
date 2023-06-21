@@ -1,16 +1,18 @@
 <template>
-  <div class="">
+  <div class="atoz_wrap">
     <div class="loading" v-show="loading">正在加载中</div>
     <div id="container" v-show="!loading"></div>
     <el-dialog title="任务详情" :visible.sync="dialogVisible" width="50%" :show-close="false" @close="closeDialog">
-      <el-descriptions :title="dialogData && dialogData.name" direction="vertical" :column="12" border>
+      <el-descriptions :title="dialogData && dialogData.name" direction="vertical" :column="12" border size="mini">
         <el-descriptions-item :span="6" label="创建人">{{ dialogData && dialogData.owner }}</el-descriptions-item>
         <el-descriptions-item :span="6" label="负责人">{{ dialogData && dialogData.Assignee }}</el-descriptions-item>
         <el-descriptions-item :span="4" label="当前阶段">{{ dialogData && dialogData.current }}</el-descriptions-item>
         <el-descriptions-item :span="4" label="完成进度">{{ dialogData && dialogData.percentComplete }}</el-descriptions-item>
         <el-descriptions-item :span="4" label="创建日期">{{ dialogData && getDateStr(dialogData.originated)
         }}</el-descriptions-item>
-        <el-descriptions-item :span="12" label="描述信息">{{ dialogData && dialogData.description }}</el-descriptions-item>
+        <el-descriptions-item :span="12" label="描述信息">
+          <div class="desc_scroll"> {{ dialogData && dialogData.description }}</div>
+        </el-descriptions-item>
         <el-descriptions-item :span="4" label="估计开始时间">{{ dialogData && getDateStr(dialogData.estimatedStartDate)
         }}</el-descriptions-item>
         <el-descriptions-item :span="4" label="估计截止时间">{{ dialogData && getDateStr(dialogData.estimatedEndDate)
@@ -29,7 +31,7 @@
 </template>
 
 <script>
-import { getXMLData, getProjectTask,getXMLInfo } from "../request";
+import { getXMLData, getProjectTask, getXMLInfo, getProjectTaskTest } from "../request";
 import Graph from './antv.js';
 
 import MainTaskInstance from './mainTaskInstance'
@@ -60,24 +62,37 @@ export default {
     }
   },
   mounted() {
-    getProjectTask(window.objectId).then(res => {
-      console.log('getProjectTask',res)
-      for (let index = 0; index < res.data.msg.length; index++) {
-        const task = res.data.msg[index];
-        this.projectTaskData[task.id] = task
+    this.testInit()
+    // this.proInit()
+  },
+  computed: {
+    getDateStr() {
+      return (str) => {
+        if (str == '') {
+          return ''
+        }
+        let date = new Date(str)
+        return `${date.toLocaleDateString()}  ${date.toLocaleTimeString()}`
       }
-      getXMLInfo().then(xmlPath => {
-        //1 加载xml数据 （通过接口请求文件地址，然后根据地址请求数据）
-        let xmlURL = '/3dspace/' + xmlPath.data.fileUrl.split('/3dspace/')[1]
-        getXMLData(xmlURL).then((res) => {
+    }
+  },
+  methods: {
+    testInit() {
+      getProjectTaskTest().then(res => {
+        for (let index = 0; index < res.data.msg.length; index++) {
+          const task = res.data.msg[index];
+          this.projectTaskData[task.id] = task
+        }
+        getXMLData('./test.xml').then((res) => {
           const xotree = new window.XML.ObjTree();
           const json = xotree.parseXML(res.data);
           this.handleXML(json)
           //初始画布
+          let scale = (document.documentElement.clientHeight / (this.maxY + 100))
           this.graph = new Graph({
             container: document.getElementById('container'),
-            width: (this.maxX + 100),
-            height: (this.maxY + 100),
+            width: (this.maxX + 100) * scale,
+            height: (this.maxY + 100) * scale,
             interacting: false,
             panning: true,
             // background: {
@@ -110,7 +125,6 @@ export default {
             }
           })
 
-          let scale = (document.documentElement.clientHeight / (this.maxY + 100))
           console.log('scale', scale, this.graph)
           this.graph.zoomTo(scale)
           this.graph.translate(0, 0)
@@ -121,25 +135,98 @@ export default {
           this.drawExclusiveNode(this.exclusiveNode)
           this.drawInclusiveNode(this.inclusiveNode)
           this.drawEdge(this.flowEdge)
+
+          // this.graph.addNode({
+          //   x: 160,
+          //   y: 120,
+          //   width: 360,
+          //   height: 120,
+          //   shape: 'text-block',
+          //   text: `There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.`,
+          //   attrs: {
+          //     body: {
+          //       fill: '#efdbff',
+          //       stroke: '#9254de',
+          //       rx: 4,
+          //       ry: 4,
+          //     },
+          //   },
+          // })
+
           this.loading = false
         });
+
       })
-
-    })
-
-  },
-  computed: {
-    getDateStr() {
-      return (str) => {
-        if (str == '') {
-          return ''
+    },
+    proInit() {
+      getProjectTask(window.objectId).then(res => {
+        console.log('getProjectTask', res)
+        for (let index = 0; index < res.data.msg.length; index++) {
+          const task = res.data.msg[index];
+          this.projectTaskData[task.id] = task
         }
-        let date = new Date(str)
-        return `${date.toLocaleDateString()}  ${date.toLocaleTimeString()}`
-      }
-    }
-  },
-  methods: {
+        getXMLInfo().then(xmlPath => {
+          //1 加载xml数据 （通过接口请求文件地址，然后根据地址请求数据）
+          let xmlURL = '/3dspace/' + xmlPath.data.fileUrl.split('/3dspace/')[1]
+          getXMLData(xmlURL).then((res) => {
+            const xotree = new window.XML.ObjTree();
+            const json = xotree.parseXML(res.data);
+            this.handleXML(json)
+            //初始画布
+            let scale = (document.documentElement.clientHeight / (this.maxY + 100))
+            this.graph = new Graph({
+              container: document.getElementById('container'),
+              width: (this.maxX + 100) * scale,
+              height: (this.maxY + 100) * scale,
+              interacting: false,
+              panning: true,
+              // background: {
+              //   color: '#fffbe6', // 设置画布背景颜色
+              // },
+              scroller: {
+                enabled: true,
+                pannable: true,
+                pageVisible: true,
+                pageBreak: false,
+              },
+              mousewheel: {
+                enabled: true,
+                modifiers: ['ctrl', 'meta'],
+              }
+            });
+
+
+            this.graph.on('click:task', ({ node }) => {
+              let id = node.id;
+              let task = this.allTask.find(item => {
+                return id == item['-id']
+              })
+              if (task) {
+                let dataTask = this.projectTaskData[task['-id2']]
+                // console.log('点击', dataTask)
+                this.dialogData = dataTask
+                this.dialogVisible = true
+                //展示弹窗数据
+              }
+            })
+
+
+            console.log('scale', scale, this.graph)
+            this.graph.zoomTo(scale)
+            this.graph.translate(0, 0)
+
+            this.drawMainTask(this.needMianTask)
+            this.drawOtherTask(this.quoteTask)
+            this.drawEvent(this.eventNode)
+            this.drawExclusiveNode(this.exclusiveNode)
+            this.drawInclusiveNode(this.inclusiveNode)
+            this.drawEdge(this.flowEdge)
+            this.loading = false
+          });
+        })
+
+      })
+    },
     closeDialog() {
       this.dialogData = null
     },
@@ -217,10 +304,10 @@ export default {
           this.graph.addNode({
             id: event['-id'],
             shape: 'circle',
-            width: event['-r'] * 2,
-            height: event['-r'] * 2,
-            x: pos.x - (event['-r']),
-            y: pos.y - (event['-r']),
+            width: event['-r'] * 4,
+            height: event['-r'] * 4,
+            x: pos.x - (event['-r'] * 2),
+            y: pos.y - (event['-r'] * 2),
             attrs: {
               body: {
                 strokeWidth: 1,
@@ -234,10 +321,10 @@ export default {
           this.graph.addNode({
             id: event['-id'],
             shape: 'circle',
-            width: event['-r'] * 2,
-            height: event['-r'] * 2,
-            x: pos.x - (event['-r']),
-            y: pos.y - (event['-r']),
+            width: event['-r'] * 4,
+            height: event['-r'] * 4,
+            x: pos.x - (event['-r'] * 2),
+            y: pos.y - (event['-r'] * 2),
             attrs: {
               body: {
                 strokeWidth: 1,
@@ -278,9 +365,10 @@ export default {
           router: {
             name: 'manhattan',
             args: {
-              padding: 10,
-              // startDirections: ['right', 'top', 'bottom'],
-              // endDirections: ['left', 'top', 'bottom'],
+              padding: {
+                vertical: 15,
+                left: 15,
+              }
             },
           },
           shape: 'edge',
@@ -356,4 +444,17 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="css">
+#app>div>div.el-dialog__wrapper>div>div.el-dialog__header {
+  padding: 10px !important;
+}
+
+#app>div>div.el-dialog__wrapper>div>div.el-dialog__body {
+  padding: 10px !important;
+}
+
+#app>div>div.el-dialog__wrapper>div>div.el-dialog__body>div>div.el-descriptions__body>table>tbody:nth-child(3)>tr:nth-child(2)>td>div {
+  max-height: 20px;
+  overflow: auto;
+}
+</style>

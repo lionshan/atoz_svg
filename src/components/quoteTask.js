@@ -16,10 +16,10 @@ export default {
                     tagName: 'text',
                     selector: 'mainLabel',
                 },
-                {
-                    tagName: 'text',
-                    selector: 'topLabel',
-                },
+                // {
+                //     tagName: 'text',
+                //     selector: 'topLabel',
+                // },
                 {
                     tagName: 'rect',
                     selector: 'progessBg',
@@ -56,6 +56,16 @@ export default {
             strokeWidth: 1,
             fill: '#d7d7d7',
             stroke: '#c3c6c7',
+            filter: {
+                name: 'dropShadow',
+                args: {
+                    dx: -5,
+                    dy: 1,
+                    blur: 2,
+                    opacity: 0.5,
+                    color:'#000'
+                },
+            },
         },
         progess: {
             ref: 'body',
@@ -79,22 +89,22 @@ export default {
             fill: "#fff",
             strokeWidth: 1
         },
-        topLabel: {
-            ref: 'body',
-            fill: '#000',
-            fontSize: 12,
-            refX: '50%',
-            refY: '30%',
-            textAnchor: 'middle',
-            textVerticalAnchor: 'middle',
-            text:'A'
-        },
+        // topLabel: {
+        //     ref: 'body',
+        //     fill: '#000',
+        //     fontSize: 16,
+        //     refX: '50%',
+        //     refY: '30%',
+        //     textAnchor: 'middle',
+        //     textVerticalAnchor: 'middle',
+        //     text:'A'
+        // },
         mainLabel: {
             ref: 'body',
             fill: '#000',
             fontSize: 12,
             refX: '50%',
-            refY: '70%',
+            refY: '50%',
             textAnchor: 'middle',
             textVerticalAnchor: 'middle',
         },
@@ -102,7 +112,7 @@ export default {
             xAlign: 'right',
             ref: 'body',
             fill: '#000',
-            fontSize: 12,
+            fontSize: 16,
             refX: '100%',
             refX2: -5,
             refY: 10,
@@ -150,6 +160,10 @@ export default {
 
         if(hasRisk) {
             ObjectExt.setByPath(others, 'attrs/imgRisk/display', 'block')
+        }
+
+        if(hasQuestion && hasRisk) {
+            ObjectExt.setByPath(others, 'attrs/imgRisk/refX', 26)
         }
 
         if(status) {

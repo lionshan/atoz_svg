@@ -49,8 +49,18 @@ export default {
         body: {
             rx: 10, // 圆角矩形
             strokeWidth: 1,
-            fill: '#f2f2f2',
+            fill: '#fffbe6',
             stroke: '#c3c6c7',
+            filter: {
+                name: 'dropShadow',
+                args: {
+                    dx: -5,
+                    dy: 1,
+                    blur: 2,
+                    opacity: 0.5,
+                    color:'#000'
+                },
+            },
         },
         progess: {
             ref: 'body',
@@ -78,7 +88,7 @@ export default {
         leftLabel: {
             ref: 'body',
             fill: '#000',
-            fontSize: 12,
+            fontSize: 16,
             refX: 5,
             refY: 10,
             textAnchor: 'left',
@@ -88,7 +98,7 @@ export default {
             xAlign: 'right',
             ref: 'body',
             fill: '#000',
-            fontSize: 12,
+            fontSize: 16,
             refX: '100%',
             refX2: -5,
             refY: 10,
@@ -138,6 +148,11 @@ export default {
         if(hasRisk) {
             ObjectExt.setByPath(others, 'attrs/imgRisk/display', 'block')
             ObjectExt.setByPath(others, 'attrs/leftLabel/refX', 25)
+        }
+
+        if(hasQuestion && hasRisk) {
+            ObjectExt.setByPath(others, 'attrs/imgRisk/refX', 26)
+            ObjectExt.setByPath(others, 'attrs/leftLabel/refX', 50)
         }
         return others
     },
