@@ -28,14 +28,26 @@
       </el-descriptions>
     </el-dialog>
     <div class="colorDsc">
-      <el-descriptions title="" size="mini" :column="1">
-        <el-descriptions-item  label-class-name="color_gray">待办</el-descriptions-item>
-        <el-descriptions-item label-class-name="color_yellow">进行中</el-descriptions-item>
-        <el-descriptions-item label-class-name="color_red">延期</el-descriptions-item>
-        <el-descriptions-item label-class-name="color_lightred">预警</el-descriptions-item>
-        <el-descriptions-item label-class-name="color_green">已完成</el-descriptions-item>
-      </el-descriptions>
-
+      <div class="item">
+        <div class="color_gray"></div>
+        <div class="item_text">待办</div>
+      </div>
+      <div class="item">
+        <div class="color_yellow"></div>
+        <div class="item_text">进行中</div>
+      </div>
+      <div class="item">
+        <div class="color_red"></div>
+        <div class="item_text">延期</div>
+      </div>
+      <div class="item">
+        <div class="color_lightred"></div>
+        <div class="item_text">预警</div>
+      </div>
+      <div class="item">
+        <div class="color_green"></div>
+        <div class="item_text">已完成</div>
+      </div>
     </div>
   </div>
 </template>
@@ -72,8 +84,8 @@ export default {
     }
   },
   mounted() {
-    // this.testInit()
-    this.proInit()
+    this.testInit()
+    // this.proInit()
   },
   computed: {
     getDateStr() {
@@ -96,13 +108,19 @@ export default {
         getXMLData('./test2.xml').then((res) => {
           const xotree = new window.XML.ObjTree();
           const json = xotree.parseXML(res.data);
+          console.log('jsonjsonjson', json)
           this.handleXML(json)
           //初始画布
-          let scale = (document.documentElement.clientHeight / (this.maxY + 100))
+          let scaleY = (document.documentElement.clientHeight / (this.maxY + 100))
+
+          let scaleX = (document.documentElement.clientWidth / (this.maxX + 100))
+
+          let scale = Math.min(scaleY, scaleX)
+
           this.graph = new Graph({
             container: document.getElementById('container'),
-            width: (this.maxX + 100) * scale,
-            height: (this.maxY + 100) * scale,
+            width: document.documentElement.clientWidth,
+            height: document.documentElement.clientHeight,
             interacting: false,
             panning: true,
             // background: {
@@ -183,11 +201,15 @@ export default {
             const json = xotree.parseXML(res.data);
             this.handleXML(json)
             //初始画布
-            let scale = (document.documentElement.clientHeight / (this.maxY + 100))
+            let scaleY = (document.documentElement.clientHeight / (this.maxY + 100))
+
+            let scaleX = (document.documentElement.clientWidth / (this.maxX + 100))
+
+            let scale = Math.min(scaleY, scaleX)
             this.graph = new Graph({
               container: document.getElementById('container'),
-              width: (this.maxX + 100) * scale,
-              height: (this.maxY + 100) * scale,
+              width: document.documentElement.clientWidth,
+              height: document.documentElement.clientHeight,
               interacting: false,
               panning: true,
               // background: {
@@ -413,7 +435,7 @@ export default {
         if (Number(positionArr[3]) > this.maxY) {
           this.maxY = Number(positionArr[3])
         }
-
+        console.log('anchorFlaganchorFlaganchorFlag', anchorFlag)
         let isQuote = anchorFlag.find(item => { return item['-from'] == task['-id'] })
         if (isQuote) {
           quoteTask.push(task)
@@ -441,12 +463,20 @@ export default {
     handleParent(allTasks) {
       let resArr = []
       let tempTasks = allTasks.filter(item => { return item['-parentname'] != undefined })
-      let parentArr = allTasks.filter(item => { return item['-parentname'] == undefined })
-
-
+      let parentArr = allTasks.filter(item => { return item['-parentname'] == undefined }).map(item => {
+        return {
+          ...item,
+          level: 0
+        }
+      })
       while (parentArr.length != 0) {
         let task = parentArr.shift()
-        let children = tempTasks.filter(item => { return item['-parentname'] == task['-name'] })
+        let children = tempTasks.filter(item => { return item['-parentname'] == task['-name'] }).map(item => {
+          return {
+            ...item,
+            level:task.level + 1
+          }
+        })
         tempTasks = tempTasks.filter(item => { return item['-parentname'] != task['-name'] })
         task.lastChild = (children.length == 0)
         parentArr.push(...children)
@@ -462,51 +492,79 @@ export default {
 </script>
 
 <style lang="css">
-#app > div > div.colorDsc {
+#app>div>div.colorDsc>div.item {
+  width: 100%;
+  display: flex;
+  margin: 5px;
+}
+
+#app>div>div.colorDsc>div.item>div.item_text {
+  width: 50%;
+  margin-left: 10px;
+}
+
+.color_gray {
+  width: 50%;
+  background: #d7d7d7;
+  border-radius: 5px;
+}
+
+.color_yellow {
+  background: yellow;
+  width: 50%;
+  border-radius: 5px;
+}
+
+.color_lightred {
+  background: #f99bae;
+  width: 50%;
+  border-radius: 5px;
+}
+
+.color_green {
+  background: green;
+  width: 50%;
+  border-radius: 5px;
+}
+
+.color_red {
+  background: red;
+  width: 50%;
+  border-radius: 5px;
+}
+
+#app>div>div.colorDsc {
   position: fixed;
   top: 20px;
   right: 20px;
   width: 150px;
+  display: flex;
+  flex-direction: column;
 
 }
 
-#app > div > div.colorDsc > div > div.el-descriptions__header {
+#app>div>div.colorDsc>div>div>table>tbody>tr>td>div>span.el-descriptions-item__content {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#app>div>div.colorDsc>div>div.el-descriptions__body {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+#app>div>div.colorDsc>div>div>table {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+#app>div>div.colorDsc>div>div.el-descriptions__header {
   margin: 5px !important;
 }
-#app > div > div.colorDsc > div > div.el-descriptions__body > table {
-  .color_gray {
-    background: #d7d7d7;
-    width: 50px;
-    border-radius: 5px;
-  }
-  .color_yellow {
-    background: yellow;
-    width: 50px;
-    border-radius: 5px;
-  }
-  .color_lightred {
-    background: #f99bae;
-    width: 50px;
-    border-radius: 5px;
-  }
-  .color_green {
-    background: green;
-    width: 50px;
-    border-radius: 5px;
-  }
-  .color_red {
-    background: red;
-    width: 50px;
-    border-radius: 5px;
-  }
+
+
+#app>div>div.colorDsc>div>div.el-descriptions__body>table>tbody>tr>td>div>span.el-descriptions-item__label {
+  color: #000000;
 }
 
-.el-descriptions-item__label.has-colon::after {
-  content: '' !important;
-}
-#app > div > div.colorDsc > div > div.el-descriptions__body > table > tbody > tr > td > div > span.el-descriptions-item__label {
-  color: #000000;  
-}
 #app>div>div.el-dialog__wrapper>div>div.el-dialog__header {
   padding: 10px !important;
 }

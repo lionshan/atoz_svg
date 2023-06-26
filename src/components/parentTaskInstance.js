@@ -35,6 +35,11 @@ class ParentInstance {
             red: 'red'
         }
         this.status = colorMap[task.Status]
+
+        const colors = ['#fffbe6','#cdfffe']
+        if(task.level != undefined) {
+            this.bgColor = colors[task.level % 2]
+        }
         if(task.percentComplete){
             this.progessLabel = Number(task.percentComplete).toFixed(0) + '%'
         }

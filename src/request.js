@@ -1558,7 +1558,7 @@ const getProjectTaskTest = () => {
 const getXMLData = (url) => {
   return axios({
     method: "get",//指定请求方式
-    url: url, //url
+    url: url+`?time=${new Date().getTime()}`, //url
   })
 }
 

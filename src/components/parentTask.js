@@ -126,7 +126,7 @@ export default {
         },
     },
     propHooks(metadata) {
-        const { progessLabel, leftLabel, progessVisible,hasQuestion,hasRisk, ...others } = metadata
+        const { progessLabel, leftLabel, progessVisible,hasQuestion,hasRisk,bgColor, ...others } = metadata
         if (leftLabel) {
             ObjectExt.setByPath(others, 'attrs/leftLabel/text', leftLabel)
         }
@@ -153,6 +153,10 @@ export default {
         if(hasQuestion && hasRisk) {
             ObjectExt.setByPath(others, 'attrs/imgRisk/refX', 26)
             ObjectExt.setByPath(others, 'attrs/leftLabel/refX', 50)
+        }
+
+        if (bgColor) {
+            ObjectExt.setByPath(others, 'attrs/body/fill', bgColor)
         }
         return others
     },
