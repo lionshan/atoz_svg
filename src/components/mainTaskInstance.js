@@ -29,7 +29,7 @@ class MainTaskInstance {
         }
              
         const colorMap = {
-            gray :'gray',
+            gray :'#d7d7d7',
             yellow: 'yellow',
             Lightred: '#f99bae',
             green: 'green',

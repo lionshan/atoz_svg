@@ -4,8 +4,8 @@
     <div id="container" v-show="!loading"></div>
     <el-dialog title="任务详情" :visible.sync="dialogVisible" width="50%" :show-close="false" @close="closeDialog">
       <el-descriptions :title="dialogData && dialogData.name" direction="vertical" :column="12" border size="mini">
-        <el-descriptions-item :span="6" label="创建人">{{ dialogData && dialogData.owner }}</el-descriptions-item>
-        <el-descriptions-item :span="6" label="负责人">{{ dialogData && dialogData.Assignee }}</el-descriptions-item>
+        <el-descriptions-item :span="6" label="所有者">{{ dialogData && dialogData.owner }}</el-descriptions-item>
+        <el-descriptions-item :span="6" label="被分派人">{{ dialogData && dialogData.Assignee }}</el-descriptions-item>
         <el-descriptions-item :span="4" label="当前阶段">{{ dialogData && dialogData.current }}</el-descriptions-item>
         <el-descriptions-item :span="4" label="完成进度">{{ dialogData && dialogData.percentComplete }}</el-descriptions-item>
         <el-descriptions-item :span="4" label="创建日期">{{ dialogData && getDateStr(dialogData.originated)
@@ -27,6 +27,16 @@
         }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
+    <div class="colorDsc">
+      <el-descriptions title="" size="mini" :column="1">
+        <el-descriptions-item  label-class-name="color_gray">待办</el-descriptions-item>
+        <el-descriptions-item label-class-name="color_yellow">进行中</el-descriptions-item>
+        <el-descriptions-item label-class-name="color_red">延期</el-descriptions-item>
+        <el-descriptions-item label-class-name="color_lightred">预警</el-descriptions-item>
+        <el-descriptions-item label-class-name="color_green">已完成</el-descriptions-item>
+      </el-descriptions>
+
+    </div>
   </div>
 </template>
 
@@ -72,7 +82,7 @@ export default {
           return ''
         }
         let date = new Date(str)
-        return `${date.toLocaleDateString()}  ${date.toLocaleTimeString()}`
+        return `${date.toLocaleDateString()}`
       }
     }
   },
@@ -83,7 +93,7 @@ export default {
           const task = res.data.msg[index];
           this.projectTaskData[task.id] = task
         }
-        getXMLData('./test.xml').then((res) => {
+        getXMLData('./test2.xml').then((res) => {
           const xotree = new window.XML.ObjTree();
           const json = xotree.parseXML(res.data);
           this.handleXML(json)
@@ -360,21 +370,24 @@ export default {
 
       for (let index = 0; index < edges.length; index++) {
         const edge = edges[index];
-        // let pos = this.formFlowPostion(edge['-position'])
-        this.graph.addEdge({
-          router: {
-            name: 'manhattan',
-            args: {
-              padding: {
-                vertical: 15,
-                left: 15,
-              }
+        try {
+          this.graph.addEdge({
+            router: {
+              name: 'manhattan',
+              args: {
+                padding: {
+                  vertical: 15,
+                  left: 15,
+                }
+              },
             },
-          },
-          shape: 'edge',
-          source: edge['-from'],
-          target: edge['-to'],
-        })
+            shape: 'edge',
+            source: edge['-from'],
+            target: edge['-to'],
+          })
+        } catch (error) {
+          console.error('errorerror', error)
+        }
       }
     },
     //处理xml数据返回不同类型的task  
@@ -411,7 +424,8 @@ export default {
       }
 
       needMianTask = this.handleParent(mainTask)
-
+      console.log('mainTaskmainTask', mainTask.length, mainTask)
+      console.log('needMianTask', needMianTask.length, needMianTask)
       this.needMianTask = this.handleState(needMianTask);
       console.log('this.needMianTask', this.needMianTask)
       this.quoteTask = this.handleState(quoteTask);
@@ -429,6 +443,7 @@ export default {
       let tempTasks = allTasks.filter(item => { return item['-parentname'] != undefined })
       let parentArr = allTasks.filter(item => { return item['-parentname'] == undefined })
 
+
       while (parentArr.length != 0) {
         let task = parentArr.shift()
         let children = tempTasks.filter(item => { return item['-parentname'] == task['-name'] })
@@ -437,7 +452,9 @@ export default {
         parentArr.push(...children)
         resArr.push(task)
       }
-      return resArr
+      console.log('tempTasks', tempTasks)
+      console.log('parentArr', parentArr)
+      return [...resArr, ...tempTasks]
     }
 
   }
@@ -445,6 +462,51 @@ export default {
 </script>
 
 <style lang="css">
+#app > div > div.colorDsc {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 150px;
+
+}
+
+#app > div > div.colorDsc > div > div.el-descriptions__header {
+  margin: 5px !important;
+}
+#app > div > div.colorDsc > div > div.el-descriptions__body > table {
+  .color_gray {
+    background: #d7d7d7;
+    width: 50px;
+    border-radius: 5px;
+  }
+  .color_yellow {
+    background: yellow;
+    width: 50px;
+    border-radius: 5px;
+  }
+  .color_lightred {
+    background: #f99bae;
+    width: 50px;
+    border-radius: 5px;
+  }
+  .color_green {
+    background: green;
+    width: 50px;
+    border-radius: 5px;
+  }
+  .color_red {
+    background: red;
+    width: 50px;
+    border-radius: 5px;
+  }
+}
+
+.el-descriptions-item__label.has-colon::after {
+  content: '' !important;
+}
+#app > div > div.colorDsc > div > div.el-descriptions__body > table > tbody > tr > td > div > span.el-descriptions-item__label {
+  color: #000000;  
+}
 #app>div>div.el-dialog__wrapper>div>div.el-dialog__header {
   padding: 10px !important;
 }
