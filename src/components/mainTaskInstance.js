@@ -39,8 +39,8 @@ class MainTaskInstance {
         if(task.percentComplete) {
             this.progessLabel = Number(task.percentComplete).toFixed(0) + '%'
 
-            // this.progessLabel = (Number(task.percentComplete) + Math.random() * 100).toFixed(2) + '%'
         }
+        
         this.hasQuestion = task.hasQuestion == 'Y'
         this.hasRisk = task.hasRisk == 'Y'
         // if(Math.random() > 0.5) {
@@ -48,6 +48,8 @@ class MainTaskInstance {
             // this.hasQuestion = true
             // this.hasRisk = true
         // }
+        // this.progessLabel =  (Math.random() * 100).toFixed(2) + '%'
+        // this.progessVisible = true
     }
 }
 

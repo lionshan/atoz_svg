@@ -65,22 +65,22 @@ export default {
         progess: {
             ref: 'body',
             rx: 5, // 圆角矩形
-            height: 10,
+            height: 30,
             refWidth: '50%',
             refX: '0',     // 矩形 x 轴坐标位于节点右下角
             refY: '100%',     // 矩形 y 轴坐标位于节点右下角
-            y: -10,
+            y: -30,
             fill: "#699c37",
             stroke: "none"
         },
         progessBg: {
             ref: 'body',
             rx: 5, // 圆角矩形
-            height: 10,
+            height: 30,
             refWidth: '100%',
             refX: '0',     // 矩形 x 轴坐标位于节点右下角
             refY: '100%',     // 矩形 y 轴坐标位于节点右下角
-            y: -10,
+            y: -30,
             fill: "#fff",
             strokeWidth: 1,
             stroke: "#c3c6c7"
@@ -95,14 +95,22 @@ export default {
             textVerticalAnchor: 'middle',
         },
         progessLabel: {
-            xAlign: 'right',
+            // xAlign: 'right',
+            // ref: 'body',
+            // fill: '#000',
+            // fontSize: 16,
+            // refX: '100%',
+            // refX2: -5,
+            // refY: 10,
+            // textAnchor: 'right',
             ref: 'body',
+            refWidth: '100%',
             fill: '#000',
-            fontSize: 16,
-            refX: '100%',
-            refX2: -5,
-            refY: 10,
-            textAnchor: 'right',
+            fontSize: 20,
+            refX: '50%',
+            refY: '100%',
+            refY2: -15,
+            textAnchor: 'middle',
         },
         imgRisk: {
             ref: 'body',

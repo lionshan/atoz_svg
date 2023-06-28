@@ -45,6 +45,8 @@ class QuoteTaskInstance {
         //     this.progessVisible = true
         //     this.hasQuestion = true
         // }
+        // this.progessLabel =  (Math.random() * 100).toFixed(2) + '%'
+        // this.progessVisible = true
     }
 }
 

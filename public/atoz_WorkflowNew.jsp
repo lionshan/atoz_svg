@@ -8,7 +8,7 @@
 <%@page import="com.matrixone.apps.domain.util.*"%>
 <%@page import="com.matrixone.apps.domain.util.ContextUtil"%>
 <%@page import="matrix.util.StringList"%>
-<%@page import="com.matrixone.apps.domain.DomainRelationship"%>;
+<%@page import="com.matrixone.apps.domain.DomainRelationship"%>
 <%@page import="java.util.HashMap"%>
 <%@page import="com.matrixone.apps.framework.ui.UIUtil"%>
 		<% String objectId=request.getParameter("objectId"); 

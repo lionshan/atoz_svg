@@ -4,12 +4,12 @@
     <div id="container" v-show="!loading"></div>
     <el-dialog title="任务详情" :visible.sync="dialogVisible" width="50%" :show-close="false" @close="closeDialog">
       <el-descriptions :title="dialogData && dialogData.name" direction="vertical" :column="12" border size="mini">
-        <el-descriptions-item :span="6" label="所有者">{{ dialogData && dialogData.owner }}</el-descriptions-item>
+        <!-- <el-descriptions-item :span="6" label="所有者">{{ dialogData && dialogData.owner }}</el-descriptions-item> -->
         <el-descriptions-item :span="6" label="被分派人">{{ dialogData && dialogData.Assignee }}</el-descriptions-item>
-        <el-descriptions-item :span="4" label="当前阶段">{{ dialogData && dialogData.current }}</el-descriptions-item>
-        <el-descriptions-item :span="4" label="完成进度">{{ dialogData && dialogData.percentComplete }}</el-descriptions-item>
-        <el-descriptions-item :span="4" label="创建日期">{{ dialogData && getDateStr(dialogData.originated)
-        }}</el-descriptions-item>
+        <el-descriptions-item :span="6" label="创建日期">{{ dialogData &&
+          getDateStr(dialogData.originated) }}</el-descriptions-item>
+        <!-- <el-descriptions-item :span="4" label="当前阶段">{{ dialogData && dialogData.current }}</el-descriptions-item> -->
+        <!-- <el-descriptions-item :span="4" label="完成进度">{{ dialogData && dialogData.percentComplete }}</el-descriptions-item> -->
         <el-descriptions-item :span="12" label="描述信息">
           <div class="desc_scroll"> {{ dialogData && dialogData.description }}</div>
         </el-descriptions-item>
@@ -25,6 +25,32 @@
         }}</el-descriptions-item>
         <el-descriptions-item :span="4" label="实际持续时间">{{ dialogData && dialogData.actualDuration
         }}</el-descriptions-item>
+        <el-descriptions-item :span="12" label="风险问题详细信息">
+          <div class="url_scroll">
+            <!-- <div class="item_style">
+              <img :src="risk" alt="">
+              <a target="_blank" href="https://www.baidu.com"> xxxxxsfdjlafj </a>
+            </div>
+            <div class="item_style">
+              <img :src="risk" alt="">
+              <a target="_blank" href="https://www.baidu.com"> xxxxxsfdjlafj </a>
+            </div>
+            <div class="item_style">
+              <img :src="risk" alt="">
+              <a target="_blank" href="https://www.baidu.com"> xxxxxsfdjlafj </a>
+            </div> -->
+            <div v-for="(item, index) in dialogData && dialogData.riskData" :key="`risk_${index}`" class="item_style">
+              <img :src="risk" alt="">
+              <a target="_blank" :href="item.url"> {{ item.name }} </a>
+            </div>
+            <div v-for="(item, index) in dialogData && dialogData.questionData" :key="`ques_${index}`" class="item_style">
+              <img :src="ques" alt="">
+              <a target="_blank" :href="item.url"> {{ item.name }} </a>
+            </div>
+          </div>
+        </el-descriptions-item>
+
+
       </el-descriptions>
     </el-dialog>
     <div class="colorDsc">
@@ -66,6 +92,8 @@ export default {
   props: {},
   data() {
     return {
+      risk: require('../assets/risk.jpg'),
+      ques: require('../assets/question.jpg'),
       projectTaskData: {},
       needMianTask: [],
       allTask: [],
@@ -80,12 +108,14 @@ export default {
       loading: true,
       wrapRect: null,
       dialogVisible: false,
-      dialogData: null
+      dialogData: null,
+      ani: null,
+      ani2: null
     }
   },
   mounted() {
-    this.testInit()
-    // this.proInit()
+    // this.testInit()
+    this.proInit()
   },
   computed: {
     getDateStr() {
@@ -135,7 +165,22 @@ export default {
             mousewheel: {
               enabled: true,
               modifiers: ['ctrl', 'meta'],
-            }
+            },
+            highlighting: {
+              // 当链接桩可以被链接时，在链接桩外围渲染一个 2px 宽的红色矩形框
+              default: {
+                name: 'stroke',
+                args: {
+                  rx: 10,
+                  ry: 10,
+                  padding: 10,
+                  attrs: {
+                    'stroke-width': 4,
+                    stroke: '#7af001',
+                  }
+                },
+              },
+            },
           });
 
 
@@ -150,6 +195,57 @@ export default {
               this.dialogData = dataTask
               this.dialogVisible = true
               //展示弹窗数据
+            }
+          })
+
+          this.graph.on('click:quotetask', ({ node }) => {
+            console.log('nodenodenode', node)
+            let id = node.id;
+            let task = this.allTask.find(item => {
+              return id == item['-id']
+            })
+            if (task) {
+              //寻找主任务节点
+              let mainTask = this.needMianTask.find(item => {
+                return task['-name'] == item['-name']
+              })
+
+              if (mainTask) {
+                //存在 添加主任闪烁
+                let mainTaskView = this.graph.findViewByCell(mainTask['-id'])
+
+                // console.log('view', rectView)
+                if (mainTaskView) {
+                  // this.graph.positionCell(mainTaskView,'center')
+                  if (this.ani) {
+                    clearInterval(this.ani)
+                    this.ani = null
+                  }
+                  if (this.ani2) {
+                    clearTimeout(this.ani2)
+                    this.ani2 = null
+                  }
+                  this.ani = setInterval(() => {
+                    mainTaskView.highlight()
+                    setTimeout(() => {
+                      mainTaskView.unhighlight()
+                    }, 200);
+                  }, 400);
+                  this.ani2 = setTimeout(() => {
+                    clearInterval(this.ani)
+                    clearTimeout(this.ani2)
+                    this.ani = null
+                    this.ani2 = null
+                  }, 3000)
+                }
+              }
+              else {
+                let dataTask = this.projectTaskData[task['-id2']]
+                this.dialogData = dataTask
+                this.dialogVisible = true
+                //展示弹窗数据
+              }
+
             }
           })
 
@@ -224,7 +320,22 @@ export default {
               mousewheel: {
                 enabled: true,
                 modifiers: ['ctrl', 'meta'],
-              }
+              },
+              highlighting: {
+                // 当链接桩可以被链接时，在链接桩外围渲染一个 2px 宽的红色矩形框
+                default: {
+                  name: 'stroke',
+                  args: {
+                    rx: 10,
+                    ry: 10,
+                    padding: 10,
+                    attrs: {
+                      'stroke-width': 4,
+                      stroke: '#7af001',
+                    }
+                  },
+                },
+              },
             });
 
 
@@ -241,7 +352,56 @@ export default {
                 //展示弹窗数据
               }
             })
+            this.graph.on('click:quotetask', ({ node }) => {
+              console.log('nodenodenode', node)
+              let id = node.id;
+              let task = this.allTask.find(item => {
+                return id == item['-id']
+              })
+              if (task) {
+                //寻找主任务节点
+                let mainTask = this.needMianTask.find(item => {
+                  return task['-name'] == item['-name']
+                })
 
+                if (mainTask) {
+                  //存在 添加主任闪烁
+                  let mainTaskView = this.graph.findViewByCell(mainTask['-id'])
+
+                  // console.log('view', rectView)
+                  if (mainTaskView) {
+                    // this.graph.positionCell(mainTaskView,'center')
+                    if (this.ani) {
+                      clearInterval(this.ani)
+                      this.ani = null
+                    }
+                    if (this.ani2) {
+                      clearTimeout(this.ani2)
+                      this.ani2 = null
+                    }
+                    this.ani = setInterval(() => {
+                      mainTaskView.highlight()
+                      setTimeout(() => {
+                        mainTaskView.unhighlight()
+                      }, 200);
+                    }, 400);
+                    this.ani2 = setTimeout(() => {
+                      clearInterval(this.ani)
+                      clearTimeout(this.ani2)
+                      this.ani = null
+                      this.ani2 = null
+                    }, 3000)
+                  }
+                }
+                else {
+                  let dataTask = this.projectTaskData[task['-id2']]
+                  this.dialogData = dataTask
+                  this.dialogVisible = true
+                  //展示弹窗数据
+                }
+
+              }
+            })
 
             console.log('scale', scale, this.graph)
             this.graph.zoomTo(scale)
@@ -435,7 +595,6 @@ export default {
         if (Number(positionArr[3]) > this.maxY) {
           this.maxY = Number(positionArr[3])
         }
-        console.log('anchorFlaganchorFlaganchorFlag', anchorFlag)
         let isQuote = anchorFlag.find(item => { return item['-from'] == task['-id'] })
         if (isQuote) {
           quoteTask.push(task)
@@ -446,10 +605,10 @@ export default {
       }
 
       needMianTask = this.handleParent(mainTask)
-      console.log('mainTaskmainTask', mainTask.length, mainTask)
-      console.log('needMianTask', needMianTask.length, needMianTask)
+
+
       this.needMianTask = this.handleState(needMianTask);
-      console.log('this.needMianTask', this.needMianTask)
+
       this.quoteTask = this.handleState(quoteTask);
       this.eventNode = eventNode;
       this.flowEdge = flowEdge;
@@ -474,7 +633,7 @@ export default {
         let children = tempTasks.filter(item => { return item['-parentname'] == task['-name'] }).map(item => {
           return {
             ...item,
-            level:task.level + 1
+            level: task.level + 1
           }
         })
         tempTasks = tempTasks.filter(item => { return item['-parentname'] != task['-name'] })
@@ -573,8 +732,26 @@ export default {
   padding: 10px !important;
 }
 
-#app>div>div.el-dialog__wrapper>div>div.el-dialog__body>div>div.el-descriptions__body>table>tbody:nth-child(3)>tr:nth-child(2)>td>div {
+#app>div>div.el-dialog__wrapper>div>div.el-dialog__body>div>div.el-descriptions__body>table>tbody:nth-child(3)>tr:nth-child(2)>td>div.desc_scroll {
   max-height: 20px;
   overflow: auto;
+}
+
+#app>div>div.el-dialog__wrapper>div>div.el-dialog__body>div>div.el-descriptions__body>table>tbody:nth-child(5)>tr:nth-child(2)>td>div.url_scroll {
+  max-height: 80px;
+  overflow: auto;
+}
+
+.item_style {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  /* border: 1px solid #EBEEF5 */
+}
+
+.item_style>img {
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
 }
 </style>
