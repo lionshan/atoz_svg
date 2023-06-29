@@ -715,13 +715,13 @@ export default {
 }
 
 .color_yellow {
-  background: yellow;
+  background: #fff38c;
   width: 50%;
   border-radius: 5px;
 }
 
 .color_lightred {
-  background: #f99bae;
+  background: #f99417;
   width: 50%;
   border-radius: 5px;
 }
