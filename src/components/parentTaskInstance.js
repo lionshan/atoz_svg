@@ -43,6 +43,9 @@ class ParentInstance {
         if(task.percentComplete){
             this.progessLabel = Number(task.percentComplete).toFixed(0) + '%'
         }
+        if(task.level == 0) {
+            this.leftLabelFont = 32
+        }
         // this.progessLabel = (Number(task.percentComplete) + Math.random() * 100).toFixed(2) + '%'
         this.hasQuestion = task.hasQuestion == 'Y'
         this.hasRisk = task.hasRisk == 'Y'

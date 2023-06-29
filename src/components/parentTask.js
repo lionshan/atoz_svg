@@ -134,9 +134,13 @@ export default {
         },
     },
     propHooks(metadata) {
-        const { progessLabel, leftLabel, progessVisible,hasQuestion,hasRisk,bgColor, ...others } = metadata
+        const { progessLabel,leftLabelFont, leftLabel, progessVisible,hasQuestion,hasRisk,bgColor, ...others } = metadata
         if (leftLabel) {
             ObjectExt.setByPath(others, 'attrs/leftLabel/text', leftLabel)
+        }
+        if(leftLabelFont) {
+            ObjectExt.setByPath(others, 'attrs/leftLabel/fontSize', leftLabelFont)
+            ObjectExt.setByPath(others, 'attrs/leftLabel/refY', 20)
         }
         if (progessLabel) {
             ObjectExt.setByPath(others, 'attrs/progessLabel/text', progessLabel)
@@ -166,6 +170,8 @@ export default {
         if (bgColor) {
             ObjectExt.setByPath(others, 'attrs/body/fill', bgColor)
         }
+
+
         return others
     },
 }
