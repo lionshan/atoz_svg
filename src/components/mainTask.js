@@ -114,8 +114,8 @@ export default {
             ref: 'body',
             refX: 6,
             refY: 2,
-            width: 16,
-            height: 16,
+            width: 26,
+            height: 26,
             'xlink:href':
                 './assets/risk.jpg',
             display: 'none'
@@ -124,8 +124,8 @@ export default {
             ref: 'body',
             refX: 6,
             refY: 2,
-            width: 16,
-            height: 16,
+            width: 26,
+            height: 26,
             'xlink:href':
                 './assets/question.jpg',
             display: 'none'
@@ -153,9 +153,9 @@ export default {
         if (hasRisk) {
             ObjectExt.setByPath(others, 'attrs/imgRisk/display', 'block')
         }
-
+      
         if (hasQuestion && hasRisk) {
-            ObjectExt.setByPath(others, 'attrs/imgRisk/refX', 26)
+            ObjectExt.setByPath(others, 'attrs/imgRisk/refX', 38)
         }
         if (status) {
             ObjectExt.setByPath(others, 'attrs/body/fill', status)

@@ -39,22 +39,27 @@
         <el-descriptions-item :span="12" label="风险问题详细信息">
           <div class="url_scroll">
             <!-- <div class="item_style">
+              风险：
               <img :src="risk" alt="">
               <a target="_blank" href="https://www.baidu.com"> xxxxxsfdjlafj </a>
             </div>
             <div class="item_style">
+              风险：
               <img :src="risk" alt="">
               <a target="_blank" href="https://www.baidu.com"> xxxxxsfdjlafj </a>
             </div>
             <div class="item_style">
+              问题：
               <img :src="risk" alt="">
               <a target="_blank" href="https://www.baidu.com"> xxxxxsfdjlafj </a>
             </div> -->
             <div v-for="(item, index) in dialogData && dialogData.riskData" :key="`risk_${index}`" class="item_style">
+              风险：
               <img :src="risk" alt="" />
               <a target="_blank" :href="item.url"> {{ item.name }} </a>
             </div>
             <div v-for="(item, index) in dialogData && dialogData.questionData" :key="`ques_${index}`" class="item_style">
+              问题：
               <img :src="ques" alt="" />
               <a target="_blank" :href="item.url"> {{ item.name }} </a>
             </div>

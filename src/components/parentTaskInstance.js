@@ -49,6 +49,8 @@ class ParentInstance {
         // this.progessLabel = (Number(task.percentComplete) + Math.random() * 100).toFixed(2) + '%'
         this.hasQuestion = task.hasQuestion == 'Y'
         this.hasRisk = task.hasRisk == 'Y'
+
+    
         // if(Math.random() > 0.5) {
         //     this.progessVisible = true
         //     this.hasQuestion = true
