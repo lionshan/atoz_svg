@@ -36,7 +36,7 @@ class ParentInstance {
         }
         this.status = colorMap[task.Status]
 
-        const colors = ['#fffbe6','#cdfffe']
+        const colors = ['#fffbe6','#b0daff']
         if(task.level != undefined) {
             this.bgColor = colors[task.level % 2]
         }
