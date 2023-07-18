@@ -713,7 +713,7 @@ export default {
 }
 
 .color_yellow {
-  background: #fff38c;
+  background: #FFFF00;
   width: 50%;
   border-radius: 5px;
 }
