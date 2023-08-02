@@ -2,8 +2,20 @@
   <div class="atoz_wrap">
     <div class="loading" v-show="loading">正在加载中</div>
     <div id="container" v-show="!loading"></div>
-    <el-dialog title="任务详情" :visible.sync="dialogVisible" width="50%" :show-close="false" @close="closeDialog">
-      <el-descriptions :title="dialogData && dialogData.name" direction="vertical" :column="12" border size="mini">
+    <el-dialog
+      title="任务详情"
+      :visible.sync="dialogVisible"
+      width="50%"
+      :show-close="false"
+      @close="closeDialog"
+    >
+      <el-descriptions
+        :title="dialogData && dialogData.name"
+        direction="vertical"
+        :column="12"
+        border
+        size="mini"
+      >
         <!-- <el-descriptions-item :span="6" label="所有者">{{ dialogData && dialogData.owner }}</el-descriptions-item> -->
         <el-descriptions-item :span="6" label="被分派人">{{
           dialogData && dialogData.Assignee
@@ -53,12 +65,20 @@
               <img :src="risk" alt="">
               <a target="_blank" href="https://www.baidu.com"> xxxxxsfdjlafj </a>
             </div> -->
-            <div v-for="(item, index) in dialogData && dialogData.riskData" :key="`risk_${index}`" class="item_style">
+            <div
+              v-for="(item, index) in dialogData && dialogData.riskData"
+              :key="`risk_${index}`"
+              class="item_style"
+            >
               风险：
               <img :src="risk" alt="" />
               <a target="_blank" :href="item.url"> {{ item.name }} </a>
             </div>
-            <div v-for="(item, index) in dialogData && dialogData.questionData" :key="`ques_${index}`" class="item_style">
+            <div
+              v-for="(item, index) in dialogData && dialogData.questionData"
+              :key="`ques_${index}`"
+              class="item_style"
+            >
               问题：
               <img :src="ques" alt="" />
               <a target="_blank" :href="item.url"> {{ item.name }} </a>
@@ -133,7 +153,7 @@ export default {
   },
   mounted() {
     // this.testInit();
-    this.proInit()
+    this.proInit();
   },
   computed: {
     getDateStr() {
@@ -153,7 +173,7 @@ export default {
           const task = res.data.msg[index];
           this.projectTaskData[task.id] = task;
         }
-        getXMLData("./test2.xml").then((res) => {
+        getXMLData("./test3.xml").then((res) => {
           const xotree = new window.XML.ObjTree();
           const json = xotree.parseXML(res.data);
           console.log("jsonjsonjson", json);
@@ -231,7 +251,7 @@ export default {
               if (mainTask) {
                 //存在 添加主任闪烁
                 if (this.ani) {
-                  return
+                  return;
                 }
                 let mainTaskView = this.graph.findViewByCell(mainTask["-id"]);
                 let tempEdge = this.graph.addEdge({
@@ -240,7 +260,7 @@ export default {
                   target: mainTaskView,
                   attrs: {
                     line: {
-                      stroke: '#7af001',
+                      stroke: "#7af001",
                     },
                   },
                 });
@@ -266,7 +286,7 @@ export default {
                     clearTimeout(this.ani2);
                     this.ani = null;
                     this.ani2 = null;
-                    tempEdge.remove()
+                    tempEdge.remove();
                   }, 3000);
                 }
               } else {
@@ -605,16 +625,31 @@ export default {
       }
     },
     //处理xml数据返回不同类型的task
+    handleArray(data) {
+      if (data) {
+        if (Array.isArray(data)) {
+          return data;
+        } else {
+          return [data];
+        }
+      } else {
+        return [];
+      }
+    },
     handleXML(xmlJson) {
       let needMianTask = [];
       let mainTask = [];
       let quoteTask = [];
-      let eventNode = xmlJson.processes.Process.event;
-      let flowEdge = xmlJson.processes.Process.flow;
-      let inclusiveNode = xmlJson.processes.Process.InclusiveGateway;
-      let exclusiveNode = xmlJson.processes.Process.ExclusiveGateway;
-      let allTask = xmlJson.processes.Process.task;
-      let anchorFlag = xmlJson.processes.Process.anchor;
+      let eventNode = this.handleArray(xmlJson.processes.Process.event);
+      let flowEdge = this.handleArray(xmlJson.processes.Process.flow);
+      let inclusiveNode = this.handleArray(
+        xmlJson.processes.Process.InclusiveGateway
+      );
+      let exclusiveNode = this.handleArray(
+        xmlJson.processes.Process.ExclusiveGateway
+      );
+      let allTask = this.handleArray(xmlJson.processes.Process.task);
+      let anchorFlag = this.handleArray(xmlJson.processes.Process.anchor);
       this.allTask = allTask;
       //区分主副任务
       for (let index = 0; index < allTask.length; index++) {
@@ -629,7 +664,7 @@ export default {
         if (Number(positionArr[3]) > this.maxY) {
           this.maxY = Number(positionArr[3]);
         }
-        let isQuote = anchorFlag.find((item) => {
+        let isQuote = anchorFlag?.find((item) => {
           return item["-from"] == task["-id"];
         });
         if (isQuote) {
@@ -695,13 +730,13 @@ export default {
 </script>
 
 <style lang="css">
-#app>div>div.colorDsc>div.item {
+#app > div > div.colorDsc > div.item {
   width: 100%;
   display: flex;
   margin: 5px;
 }
 
-#app>div>div.colorDsc>div.item>div.item_text {
+#app > div > div.colorDsc > div.item > div.item_text {
   width: 50%;
   margin-left: 10px;
 }
@@ -713,7 +748,7 @@ export default {
 }
 
 .color_yellow {
-  background: #FFFF00;
+  background: #ffff00;
   width: 50%;
   border-radius: 5px;
 }
@@ -736,7 +771,7 @@ export default {
   border-radius: 5px;
 }
 
-#app>div>div.colorDsc {
+#app > div > div.colorDsc {
   position: fixed;
   top: 20px;
   right: 20px;
@@ -745,41 +780,83 @@ export default {
   flex-direction: column;
 }
 
-#app>div>div.colorDsc>div>div>table>tbody>tr>td>div>span.el-descriptions-item__content {
+#app
+  > div
+  > div.colorDsc
+  > div
+  > div
+  > table
+  > tbody
+  > tr
+  > td
+  > div
+  > span.el-descriptions-item__content {
   font-size: 16px;
   font-weight: 600;
 }
 
-#app>div>div.colorDsc>div>div.el-descriptions__body {
+#app > div > div.colorDsc > div > div.el-descriptions__body {
   background-color: rgba(0, 0, 0, 0);
 }
 
-#app>div>div.colorDsc>div>div>table {
+#app > div > div.colorDsc > div > div > table {
   background-color: rgba(0, 0, 0, 0);
 }
 
-#app>div>div.colorDsc>div>div.el-descriptions__header {
+#app > div > div.colorDsc > div > div.el-descriptions__header {
   margin: 5px !important;
 }
 
-#app>div>div.colorDsc>div>div.el-descriptions__body>table>tbody>tr>td>div>span.el-descriptions-item__label {
+#app
+  > div
+  > div.colorDsc
+  > div
+  > div.el-descriptions__body
+  > table
+  > tbody
+  > tr
+  > td
+  > div
+  > span.el-descriptions-item__label {
   color: #000000;
 }
 
-#app>div>div.el-dialog__wrapper>div>div.el-dialog__header {
+#app > div > div.el-dialog__wrapper > div > div.el-dialog__header {
   padding: 10px !important;
 }
 
-#app>div>div.el-dialog__wrapper>div>div.el-dialog__body {
+#app > div > div.el-dialog__wrapper > div > div.el-dialog__body {
   padding: 10px !important;
 }
 
-#app>div>div.el-dialog__wrapper>div>div.el-dialog__body>div>div.el-descriptions__body>table>tbody:nth-child(3)>tr:nth-child(2)>td>div.desc_scroll {
+#app
+  > div
+  > div.el-dialog__wrapper
+  > div
+  > div.el-dialog__body
+  > div
+  > div.el-descriptions__body
+  > table
+  > tbody:nth-child(3)
+  > tr:nth-child(2)
+  > td
+  > div.desc_scroll {
   max-height: 20px;
   overflow: auto;
 }
 
-#app>div>div.el-dialog__wrapper>div>div.el-dialog__body>div>div.el-descriptions__body>table>tbody:nth-child(5)>tr:nth-child(2)>td>div.url_scroll {
+#app
+  > div
+  > div.el-dialog__wrapper
+  > div
+  > div.el-dialog__body
+  > div
+  > div.el-descriptions__body
+  > table
+  > tbody:nth-child(5)
+  > tr:nth-child(2)
+  > td
+  > div.url_scroll {
   max-height: 80px;
   overflow: auto;
 }
@@ -791,7 +868,7 @@ export default {
   /* border: 1px solid #EBEEF5 */
 }
 
-.item_style>img {
+.item_style > img {
   width: 16px;
   height: 16px;
   margin-right: 10px;
